@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PyCamp — Полный курс Python</title>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0a0a23;
+    --bg-2: #1b1b32;
+    --bg-3: #2a2a40;
+    --fg: #dfdfe2;
+    --fg-dim: #acacac;
+    --accent: #f1be32;
+    --accent-2: #99c9ff;
+    --success: #acd157;
+    --danger: #f85660;
+    --border: #3b3b4f;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  header {
+    background: var(--bg-2);
+    border-bottom: 2px solid var(--accent);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--fg);
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    color: var(--bg);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 18px;
+  }
+  .logo small { color: var(--accent); font-weight: 400; font-size: 12px; display: block; }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+  .progress-wrap {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--fg-dim);
+  }
+  .progress-bar {
+    width: 160px; height: 8px;
+    background: var(--bg-3);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--success));
+    transition: width 0.4s;
+  }
+  .btn {
+    background: var(--bg-3);
+    color: var(--fg);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: var(--border); }
+  .btn-primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+  .btn-primary:hover { background: #d9a82a; }
+  .btn-success { background: var(--success); color: var(--bg); border-color: var(--success); font-weight: 600; }
+
+  main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+  aside {
+    width: 320px;
+    background: var(--bg-2);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .section-title {
+    padding: 16px 20px 8px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--fg-dim);
+    font-weight: 700;
+  }
+  .lesson-item {
+    padding: 12px 20px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s;
+    font-size: 14px;
+  }
+  .lesson-item:hover { background: var(--bg-3); }
+  .lesson-item.active { background: var(--bg-3); border-left: 3px solid var(--accent); padding-left: 17px; }
+  .lesson-item.completed .check { color: var(--success); }
+  .check {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--fg-dim);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .lesson-item.completed .check {
+    border-color: var(--success);
+    background: var(--success);
+    color: var(--bg);
+  }
+  .lesson-title { flex: 1; line-height: 1.3; }
+  .lesson-num { color: var(--fg-dim); font-size: 11px; margin-right: 4px; }
+
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .lesson-header {
+    padding: 24px 32px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .lesson-header h1 {
+    font-size: 26px;
+    margin-bottom: 6px;
+    color: var(--accent-2);
+  }
+  .lesson-header .meta {
+    font-size: 13px;
+    color: var(--fg-dim);
+  }
+  .lesson-body {
+    padding: 24px 32px;
+    max-width: 900px;
+    line-height: 1.7;
+    font-size: 15px;
+  }
+  .lesson-body h2 { color: var(--accent); margin: 20px 0 10px; font-size: 20px; }
+  .lesson-body h3 { color: var(--accent-2); margin: 16px 0 8px; font-size: 17px; }
+  .lesson-body p { margin-bottom: 12px; }
+  .lesson-body ul, .lesson-body ol { margin: 10px 0 14px 24px; }
+  .lesson-body li { margin-bottom: 6px; }
+  .lesson-body code {
+    background: var(--bg-2);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    color: var(--accent);
+    font-size: 0.92em;
+  }
+  .lesson-body pre {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin: 12px 0;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .lesson-body pre code { background: none; padding: 0; color: var(--fg); }
+  .info-box {
+    background: rgba(153, 201, 255, 0.08);
+    border-left: 3px solid var(--accent-2);
+    padding: 12px 16px;
+    margin: 14px 0;
+    border-radius: 4px;
+  }
+  .warn-box {
+    background: rgba(241, 190, 50, 0.08);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    margin: 14px 0;
+    border-radius: 4px;
+  }
+
+  .task-section {
+    padding: 20px 32px;
+    background: var(--bg-2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .task-section h3 {
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-size: 16px;
+  }
+  .task-list { list-style: none; }
+  .task-list li {
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+  }
+  .task-list li::before {
+    content: "○";
+    color: var(--fg-dim);
+    font-size: 18px;
+  }
+  .task-list li.pass::before {
+    content: "✓";
+    color: var(--success);
+    font-weight: bold;
+  }
+  .task-list li.fail::before {
+    content: "✗";
+    color: var(--danger);
+    font-weight: bold;
+  }
+
+  .editor-section {
+    padding: 20px 32px;
+    background: var(--bg);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .editor-wrap {
+    position: relative;
+    background: #0d0d1f;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .editor-toolbar {
+    background: var(--bg-2);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .editor-toolbar .file-name {
+    font-size: 12px;
+    color: var(--fg-dim);
+    font-family: monospace;
+  }
+  textarea#code-editor {
+    width: 100%;
+    min-height: 280px;
+    background: #0d0d1f;
+    color: #e6e6e6;
+    border: none;
+    padding: 16px;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+    tab-size: 4;
+  }
+  .output-wrap {
+    margin-top: 12px;
+    background: #0d0d1f;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .output-header {
+    background: var(--bg-2);
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--fg-dim);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+  }
+  #output {
+    padding: 14px;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 13px;
+    min-height: 80px;
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    color: var(--fg);
+  }
+  #output.error { color: var(--danger); }
+  #output.success { color: var(--success); }
+
+  .lesson-footer {
+    padding: 20px 32px;
+    background: var(--bg-2);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .loader {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,35,0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    gap: 16px;
+  }
+  .spinner {
+    width: 50px; height: 50px;
+    border: 4px solid var(--bg-3);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--bg-2);
+    border: 1px solid var(--accent);
+    padding: 14px 20px;
+    border-radius: 6px;
+    z-index: 1001;
+    animation: slideIn 0.3s;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .toast.success { border-color: var(--success); }
+  .toast.error { border-color: var(--danger); }
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  aside::-webkit-scrollbar, .content::-webkit-scrollbar, #output::-webkit-scrollbar { width: 8px; }
+  aside::-webkit-scrollbar-track, .content::-webkit-scrollbar-track { background: var(--bg); }
+  aside::-webkit-scrollbar-thumb, .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  @media (max-width: 900px) {
+    main { flex-direction: column; }
+    aside { width: 100%; max-height: 40vh; border-right: none; border-bottom: 1px solid var(--border); }
+    .lesson-body, .task-section, .editor-section, .lesson-footer, .lesson-header { padding-left: 16px; padding-right: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loader" class="loader">
+  <div class="spinner"></div>
+  <div>Загружаем Python-интерпретатор (Pyodide)...</div>
+  <div style="font-size:12px;color:var(--fg-dim)">Первая загрузка может занять несколько секунд</div>
+</div>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">Py</div>
+    <div>
+      PyCamp
+      <small>Полный курс Python · v1.0</small>
+    </div>
+  </div>
+  <div class="header-actions">
+    <div class="progress-wrap">
+      <span id="progress-text">0 / 0</span>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <button class="btn" onclick="resetProgress()">Сброс</button>
+  </div>
+</header>
+
+<main>
+  <aside id="sidebar"></aside>
+  <section class="content" id="content"></section>
+</main>
+
+<script>
+/* =========================================================
+   PyCamp — Полный курс Python
+   ========================================================= */
+
+const LESSONS = [
+  {
+    id: 0, title: "Введение в Python",
+    theory: `
+      <h2>Добро пожаловать в PyCamp!</h2>
+      <p>Python — один из самых популярных языков программирования в мире. Он используется в веб-разработке, анализе данных, машинном обучении, автоматизации и многом другом.</p>
+      <h3>Почему Python?</h3>
+      <ul>
+        <li><strong>Простой синтаксис</strong> — читается почти как английский текст</li>
+        <li><strong>Огромное сообщество</strong> — миллионы разработчиков</li>
+        <li><strong>Богатая стандартная библиотека</strong> — "батарейки в комплекте"</li>
+        <li><strong>Кроссплатформенность</strong> — работает везде</li>
+      </ul>
+      <h3>Ваша первая программа</h3>
+      <p>Традиционно изучение любого языка начинается с программы <code>Hello, World!</code>. В Python это одна строка:</p>
+      <pre><code>print("Hello, World!")</code></pre>
+      <div class="info-box">Функция <code>print()</code> выводит текст на экран. Текст (строка) заключается в кавычки — одинарные или двойные.</div>
+      <h3>Задание</h3>
+      <p>Напишите программу, которая выводит строку <code>Hello, World!</code> (именно так, с восклицательным знаком).</p>
+    `,
+    starter: `# Напишите свою первую программу\nprint("Hello, World!")`,
+    tasks: [
+      { name: "Программа выводит 'Hello, World!'", check: (out) => out.trim() === "Hello, World!" }
+    ]
+  },
+  {
+    id: 1, title: "Переменные и типы данных",
+    theory: `
+      <h2>Переменные</h2>
+      <p>Переменная — это именованная ячейка памяти, в которой хранятся данные. В Python не нужно объявлять тип переменной — он определяется автоматически.</p>
+      <pre><code>name = "Alice"
+age = 25
+height = 1.68
+is_student = True</code></pre>
+      <h3>Основные типы данных</h3>
+      <ul>
+        <li><code>int</code> — целые числа: <code>42</code>, <code>-7</code></li>
+        <li><code>float</code> — дробные числа: <code>3.14</code>, <code>-0.5</code></li>
+        <li><code>str</code> — строки: <code>"Hello"</code></li>
+        <li><code>bool</code> — логический тип: <code>True</code> или <code>False</code></li>
+        <li><code>NoneType</code> — специальное значение <code>None</code></li>
+      </ul>
+      <h3>Функция type()</h3>
+      <p>Узнать тип переменной можно с помощью <code>type()</code>:</p>
+      <pre><code>x = 10
+print(type(x))  # &lt;class 'int'&gt;</code></pre>
+      <h3>Правила именования</h3>
+      <ul>
+        <li>Имя может содержать буквы, цифры и символ <code>_</code></li>
+        <li>Не может начинаться с цифры</li>
+        <li>Регистр имеет значение: <code>age</code> и <code>Age</code> — разные переменные</li>
+        <li>Принят стиль <code>snake_case</code> для имён переменных</li>
+      </ul>
+      <h3>Задание</h3>
+      <p>Создайте переменные <code>name</code> со значением <code>"Python"</code> и <code>version</code> со значением <code>3</code>. Выведите строку вида <code>Python 3</code>.</p>
+    `,
+    starter: `# Создайте переменные name и version\nname = "Python"\nversion = 3\n\n# Выведите результат\nprint(name, version)`,
+    tasks: [
+      { name: "Вывод содержит 'Python 3'", check: (out) => out.includes("Python 3") }
+    ]
+  },
+  {
+    id: 2, title: "Операторы",
+    theory: `
+      <h2>Арифметические операторы</h2>
+      <pre><code>a = 10
+b = 3
+print(a + b)   # 13  — сложение
+print(a - b)   # 7   — вычитание
+print(a * b)   # 30  — умножение
+print(a / b)   # 3.333... — деление
+print(a // b)  # 3   — целочисленное деление
+print(a % b)   # 1   — остаток от деления
+print(a ** b)  # 1000 — возведение в степень</code></pre>
+      <h3>Операторы сравнения</h3>
+      <pre><code>print(5 == 5)   # True  — равно
+print(5 != 3)   # True  — не равно
+print(5 > 3)    # True  — больше
+print(5 < 3)    # False — меньше
+print(5 >= 5)   # True  — больше или равно
+print(5 <= 4)   # False — меньше или равно</code></pre>
+      <h3>Логические операторы</h3>
+      <pre><code>print(True and False)  # False
+print(True or False)   # True
+print(not True)        # False</code></pre>
+      <h3>Задание</h3>
+      <p>Вычислите и выведите результат выражения: <code>(15 + 5) * 2 - 10 // 3</code>.</p>
+    `,
+    starter: `# Вычислите выражение\nresult = (15 + 5) * 2 - 10 // 3\nprint(result)`,
+    tasks: [
+      { name: "Результат равен 36", check: (out) => out.trim() === "36" }
+    ]
+  },
+  {
+    id: 3, title: "Строки и форматирование",
+    theory: `
+      <h2>Строки (str)</h2>
+      <p>Строка — это последовательность символов. Создаётся в одинарных, двойных или тройных кавычках:</p>
+      <pre><code>s1 = 'Hello'
+s2 = "World"
+s3 = """Многострочная
+строка"""</code></pre>
+      <h3>Индексация и срезы</h3>
+      <pre><code>s = "Python"
+print(s[0])     # P
+print(s[-1])    # n
+print(s[0:3])   # Pyt
+print(s[::-1])  # nohtyP (разворот)</code></pre>
+      <h3>Основные методы строк</h3>
+      <pre><code>s = "  Hello, World!  "
+print(s.strip())       # "Hello, World!"
+print(s.upper())       # "  HELLO, WORLD!  "
+print(s.lower())       # "  hello, world!  "
+print(s.replace("World", "Python"))
+print(s.split(","))    # ['  Hello', ' World!  ']</code></pre>
+      <h3>Форматирование строк (f-strings)</h3>
+      <pre><code>name = "Alice"
+age = 25
+print(f"Меня зовут {name}, мне {age} лет")
+print(f"Через 5 лет мне будет {age + 5}")</code></pre>
+      <div class="info-box">f-строки (f"...") появились в Python 3.6 и являются самым удобным способом форматирования.</div>
+      <h3>Задание</h3>
+      <p>Даны переменные <code>first = "John"</code> и <code>last = "Doe"</code>. Выведите строку <code>Doe, John</code> (фамилия, запятая, пробел, имя).</p>
+    `,
+    starter: `first = "John"\nlast = "Doe"\n\n# Выведите: Doe, John\nprint(f"{last}, {first}")`,
+    tasks: [
+      { name: "Вывод: 'Doe, John'", check: (out) => out.trim() === "Doe, John" }
+    ]
+  },
+  {
+    id: 4, title: "Условные конструкции",
+    theory: `
+      <h2>Оператор if</h2>
+      <p>Условные конструкции позволяют выполнять разный код в зависимости от условий.</p>
+      <pre><code>age = 18
+if age >= 18:
+    print("Совершеннолетний")
+else:
+    print("Несовершеннолетний")</code></pre>
+      <div class="warn-box">В Python отступы (обычно 4 пробела) обязательны! Они определяют блоки кода.</div>
+      <h3>Конструкция if/elif/else</h3>
+      <pre><code>score = 85
+if score >= 90:
+    grade = "A"
+elif score >= 80:
+    grade = "B"
+elif score >= 70:
+    grade = "C"
+else:
+    grade = "F"
+print(grade)  # B</code></pre>
+      <h3>Вложенные условия</h3>
+      <pre><code>x = 10
+if x > 0:
+    if x % 2 == 0:
+        print("Положительное чётное")
+    else:
+        print("Положительное нечётное")
+else:
+    print("Неположительное")</code></pre>
+      <h3>Тернарный оператор</h3>
+      <pre><code>age = 20
+status = "взрослый" if age >= 18 else "ребёнок"
+print(status)</code></pre>
+      <h3>Задание</h3>
+      <p>Напишите программу, которая определяет, является ли число <code>n = 17</code> чётным или нечётным, и выводит <code>even</code> или <code>odd</code> соответственно.</p>
+    `,
+    starter: `n = 17\n\n# Проверьте чётность\nif n % 2 == 0:\n    print("even")\nelse:\n    print("odd")`,
+    tasks: [
+      { name: "Вывод: 'odd'", check: (out) => out.trim() === "odd" }
+    ]
+  },
+  {
+    id: 5, title: "Циклы for и while",
+    theory: `
+      <h2>Цикл for</h2>
+      <p>Цикл <code>for</code> перебирает элементы последовательности:</p>
+      <pre><code>for i in range(5):
+    print(i)  # 0, 1, 2, 3, 4
+
+for c in "Python":
+    print(c)</code></pre>
+      <h3>Функция range()</h3>
+      <pre><code>range(5)          # 0, 1, 2, 3, 4
+range(2, 6)       # 2, 3, 4, 5
+range(0, 10, 2)   # 0, 2, 4, 6, 8</code></pre>
+      <h2>Цикл while</h2>
+      <p>Цикл <code>while</code> выполняется, пока условие истинно:</p>
+      <pre><code>n = 5
+while n > 0:
+    print(n)
+    n -= 1
+print("Старт!")</code></pre>
+      <h3>Операторы break и continue</h3>
+      <pre><code># break — прерывает цикл
+for i in range(10):
+    if i == 5:
+        break
+    print(i)  # 0, 1, 2, 3, 4
+
+# continue — пропускает итерацию
+for i in range(5):
+    if i == 2:
+        continue
+    print(i)  # 0, 1, 3, 4</code></pre>
+      <h3>Задание</h3>
+      <p>Выведите сумму всех чисел от 1 до 100 включительно. Должно получиться <code>5050</code>.</p>
+    `,
+    starter: `# Сумма чисел от 1 до 100\ntotal = 0\nfor i in range(1, 101):\n    total += i\nprint(total)`,
+    tasks: [
+      { name: "Сумма равна 5050", check: (out) => out.trim() === "5050" }
+    ]
+  },
+  {
+    id: 6, title: "Списки (list)",
+    theory: `
+      <h2>Что такое список?</h2>
+      <p>Список — это упорядоченная изменяемая коллекция элементов любого типа.</p>
+      <pre><code>fruits = ["apple", "banana", "cherry"]
+numbers = [1, 2, 3, 4, 5]
+mixed = [1, "two", 3.0, True]</code></pre>
+      <h3>Основные операции</h3>
+      <pre><code>lst = [10, 20, 30]
+print(lst[0])      # 10
+print(lst[-1])     # 30
+lst.append(40)     # добавить в конец
+lst.insert(1, 15)  # вставить на позицию 1
+lst.remove(20)     # удалить по значению
+lst.pop()          # удалить и вернуть последний
+print(len(lst))    # длина</code></pre>
+      <h3>Срезы</h3>
+      <pre><code>nums = [0, 1, 2, 3, 4, 5]
+print(nums[1:4])    # [1, 2, 3]
+print(nums[:3])     # [0, 1, 2]
+print(nums[::2])    # [0, 2, 4]</code></pre>
+      <h3>List comprehension</h3>
+      <pre><code># Квадраты чисел от 0 до 9
+squares = [x**2 for x in range(10)]
+print(squares)  # [0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
+
+# Только чётные
+evens = [x for x in range(20) if x % 2 == 0]</code></pre>
+      <h3>Задание</h3>
+      <p>Создайте список чисел от 1 до 10. Выведите список их квадратов: <code>[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]</code>.</p>
+    `,
+    starter: `# Создайте список от 1 до 10\nnumbers = list(range(1, 11))\n\n# Выведите квадраты\nsquares = [x**2 for x in numbers]\nprint(squares)`,
+    tasks: [
+      { name: "Вывод: [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]", check: (out) => out.trim() === "[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]" }
+    ]
+  },
+  {
+    id: 7, title: "Кортежи и множества",
+    theory: `
+      <h2>Кортежи (tuple)</h2>
+      <p>Кортеж — это неизменяемая упорядоченная коллекция. Создаётся круглыми скобками:</p>
+      <pre><code>coords = (10, 20)
+colors = ("red", "green", "blue")
+print(coords[0])   # 10
+# coords[0] = 5    # Ошибка! Кортеж неизменяем</code></pre>
+      <p>Кортежи быстрее списков и могут использоваться как ключи словаря.</p>
+      <h3>Распаковка кортежей</h3>
+      <pre><code>point = (3, 4)
+x, y = point
+print(x, y)  # 3 4</code></pre>
+      <h2>Множества (set)</h2>
+      <p>Множество — неупорядоченная коллекция <strong>уникальных</strong> элементов:</p>
+      <pre><code>nums = {1, 2, 3, 3, 2, 1}
+print(nums)  # {1, 2, 3}</code></pre>
+      <h3>Операции над множествами</h3>
+      <pre><code>a = {1, 2, 3, 4}
+b = {3, 4, 5, 6}
+print(a | b)   # {1, 2, 3, 4, 5, 6}  — объединение
+print(a & b)   # {3, 4}              — пересечение
+print(a - b)   # {1, 2}              — разность
+print(a ^ b)   # {1, 2, 5, 6}        — симм. разность</code></pre>
+      <h3>Задание</h3>
+      <p>Даны два списка: <code>a = [1, 2, 2, 3, 4, 4, 5]</code> и <code>b = [4, 5, 5, 6, 7]</code>. Найдите и выведите множество их общих элементов.</p>
+    `,
+    starter: `a = [1, 2, 2, 3, 4, 4, 5]\nb = [4, 5, 5, 6, 7]\n\n# Найдите общие элементы\ncommon = set(a) & set(b)\nprint(common)`,
+    tasks: [
+      { name: "Общие элементы: {4, 5}", check: (out) => {
+        const t = out.trim();
+        return t === "{4, 5}" || t === "{5, 4}";
+      }}
+    ]
+  },
+  {
+    id: 8, title: "Словари (dict)",
+    theory: `
+      <h2>Что такое словарь?</h2>
+      <p>Словарь — это коллекция пар "ключ: значение". Ключи должны быть уникальными и неизменяемыми.</p>
+      <pre><code>person = {
+    "name": "Alice",
+    "age": 30,
+    "city": "Moscow"
+}
+print(person["name"])   # Alice
+print(person.get("age"))  # 30</code></pre>
+      <h3>Основные операции</h3>
+      <pre><code>d = {"a": 1, "b": 2}
+d["c"] = 3            # добавить/изменить
+del d["a"]            # удалить
+print("b" in d)       # True
+print(d.keys())       # ключи
+print(d.values())     # значения
+print(d.items())      # пары</code></pre>
+      <h3>Перебор словаря</h3>
+      <pre><code>scores = {"Alice": 95, "Bob": 87, "Carol": 92}
+for name, score in scores.items():
+    print(f"{name}: {score}")</code></pre>
+      <h3>Dict comprehension</h3>
+      <pre><code>squares = {x: x**2 for x in range(5)}
+print(squares)  # {0: 0, 1: 1, 2: 4, 3: 9, 4: 16}</code></pre>
+      <h3>Задание</h3>
+      <p>Создайте словарь <code>student</code> с ключами <code>name</code> ("Ivan") и <code>grade</code> (5). Выведите строку <code>Ivan: 5</code>.</p>
+    `,
+    starter: `student = {"name": "Ivan", "grade": 5}\nprint(f"{student['name']}: {student['grade']}")`,
+    tasks: [
+      { name: "Вывод: 'Ivan: 5'", check: (out) => out.trim() === "Ivan: 5" }
+    ]
+  },
+  {
+    id: 9, title: "Функции",
+    theory: `
+      <h2>Определение функций</h2>
+      <p>Функция — это именованный блок кода, который можно вызывать многократно.</p>
+      <pre><code>def greet(name):
+    return f"Hello, {name}!"
+
+message = greet("Alice")
+print(message)  # Hello, Alice!</code></pre>
+      <h3>Параметры по умолчанию</h3>
+      <pre><code>def power(base, exp=2):
+    return base ** exp
+
+print(power(3))     # 9
+print(power(3, 3))  # 27</code></pre>
+      <h3>Именованные аргументы</h3>
+      <pre><code>def info(name, age, city="Unknown"):
+    print(f"{name}, {age}, {city}")
+
+info("Bob", 25)
+info("Alice", 30, city="London")</code></pre>
+      <h3>*args и **kwargs</h3>
+      <pre><code>def sum_all(*args):
+    return sum(args)
+
+print(sum_all(1, 2, 3, 4))  # 10
+
+def print_info(**kwargs):
+    for k, v in kwargs.items():
+        print(f"{k}: {v}")
+
+print_info(name="Alice", age=30)</code></pre>
+      <h3>lambda-функции</h3>
+      <pre><code>square = lambda x: x ** 2
+print(square(5))  # 25
+
+nums = [3, 1, 4, 1, 5, 9]
+print(sorted(nums, key=lambda x: -x))  # [9, 5, 4, 3, 1, 1]</code></pre>
+      <h3>Задание</h3>
+      <p>Напишите функцию <code>factorial(n)</code>, которая возвращает факториал числа n. Выведите <code>factorial(5)</code> — должно получиться <code>120</code>.</p>
+    `,
+    starter: `def factorial(n):\n    result = 1\n    for i in range(1, n + 1):\n        result *= i\n    return result\n\nprint(factorial(5))`,
+    tasks: [
+      { name: "factorial(5) = 120", check: (out) => out.trim() === "120" }
+    ]
+  },
+  {
+    id: 10, title: "Обработка исключений",
+    theory: `
+      <h2>Что такое исключения?</h2>
+      <p>Исключения — это ошибки, возникающие во время выполнения программы. Если их не обработать, программа завершится.</p>
+      <pre><code>print(10 / 0)  # ZeroDivisionError
+int("abc")     # ValueError
+lst = [1, 2]
+print(lst[5])  # IndexError</code></pre>
+      <h2>Конструкция try/except</h2>
+      <pre><code>try:
+    x = int(input("Введите число: "))
+    result = 10 / x
+    print(result)
+except ValueError:
+    print("Это не число!")
+except ZeroDivisionError:
+    print("Делить на ноль нельзя!")</code></pre>
+      <h3>Блоки else и finally</h3>
+      <pre><code>try:
+    f = open("file.txt")
+except FileNotFoundError:
+    print("Файл не найден")
+else:
+    print("Файл открыт успешно")
+    f.close()
+finally:
+    print("Этот блок выполнится всегда")</code></pre>
+      <h3>Свои исключения</h3>
+      <pre><code>class MyError(Exception):
+    pass
+
+def check_age(age):
+    if age < 0:
+        raise MyError("Возраст не может быть отрицательным")
+    return age
+
+try:
+    check_age(-5)
+except MyError as e:
+    print(f"Ошибка: {e}")</code></pre>
+      <h3>Задание</h3>
+      <p>Напишите функцию <code>safe_divide(a, b)</code>, которая возвращает результат деления или строку <code>"error"</code>, если b равно нулю. Выведите <code>safe_divide(10, 0)</code>.</p>
+    `,
+    starter: `def safe_divide(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        return "error"\n\nprint(safe_divide(10, 0))`,
+    tasks: [
+      { name: "Вывод: 'error'", check: (out) => out.trim() === "error" }
+    ]
+  },
+  {
+    id: 11, title: "Файлы и ввод-вывод",
+    theory: `
+      <h2>Работа с файлами</h2>
+      <p>В Python файлы открываются функцией <code>open()</code>. Рекомендуется использовать конструкцию <code>with</code> — она автоматически закроет файл.</p>
+      <pre><code># Запись
+with open("data.txt", "w") as f:
+    f.write("Hello, World!\\n")
+    f.write("Second line\\n")
+
+# Чтение
+with open("data.txt", "r") as f:
+    content = f.read()
+    print(content)</code></pre>
+      <h3>Режимы открытия</h3>
+      <ul>
+        <li><code>"r"</code> — чтение (по умолчанию)</li>
+        <li><code>"w"</code> — запись (перезаписывает файл)</li>
+        <li><code>"a"</code> — добавление в конец</li>
+        <li><code>"x"</code> — создание (ошибка, если файл есть)</li>
+        <li><code>"b"</code> — бинарный режим</li>
+      </ul>
+      <h3>Построчное чтение</h3>
+      <pre><code>with open("data.txt") as f:
+    for line in f:
+        print(line.strip())</code></pre>
+      <div class="info-box">В браузере файловая система недоступна. В этом уроке мы используем виртуальную файловую систему Pyodide.</div>
+      <h3>Задание</h3>
+      <p>Запишите в файл <code>test.txt</code> строку <code>Hello, PyCamp!</code>, затем прочитайте его содержимое и выведите на экран.</p>
+    `,
+    starter: `# Запись в файл\nwith open("test.txt", "w") as f:\n    f.write("Hello, PyCamp!")\n\n# Чтение из файла\nwith open("test.txt", "r") as f:\n    content = f.read()\n    print(content)`,
+    tasks: [
+      { name: "Вывод: 'Hello, PyCamp!'", check: (out) => out.trim() === "Hello, PyCamp!" }
+    ]
+  },
+  {
+    id: 12, title: "Классы и ООП",
+    theory: `
+      <h2>Что такое ООП?</h2>
+      <p>Объектно-ориентированное программирование — парадигма, в которой программа строится из объектов, сочетающих данные и поведение.</p>
+      <h3>Создание класса</h3>
+      <pre><code>class Dog:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+    
+    def bark(self):
+        return f"{self.name} says: Woof!"
+
+my_dog = Dog("Rex", 3)
+print(my_dog.bark())  # Rex says: Woof!</code></pre>
+      <h3>Наследование</h3>
+      <pre><code>class Animal:
+    def __init__(self, name):
+        self.name = name
+    
+    def speak(self):
+        return "..."
+
+class Cat(Animal):
+    def speak(self):
+        return f"{self.name}: Meow!"
+
+class Dog(Animal):
+    def speak(self):
+        return f"{self.name}: Woof!"
+
+animals = [Cat("Tom"), Dog("Rex")]
+for a in animals:
+    print(a.speak())</code></pre>
+      <h3>Инкапсуляция</h3>
+      <pre><code>class BankAccount:
+    def __init__(self, owner, balance=0):
+        self.owner = owner
+        self.__balance = balance  # приватный атрибут
+    
+    def deposit(self, amount):
+        self.__balance += amount
+    
+    def get_balance(self):
+        return self.__balance
+
+acc = BankAccount("Alice", 100)
+acc.deposit(50)
+print(acc.get_balance())  # 150</code></pre>
+      <h3>Задание</h3>
+      <p>Создайте класс <code>Rectangle</code> с конструктором, принимающим <code>width</code> и <code>height</code>. Добавьте метод <code>area()</code>, возвращающий площадь. Создайте прямоугольник 5×3 и выведите его площадь (<code>15</code>).</p>
+    `,
+    starter: `class Rectangle:\n    def __init__(self, width, height):\n        self.width = width\n        self.height = height\n    \n    def area(self):\n        return self.width * self.height\n\nrect = Rectangle(5, 3)\nprint(rect.area())`,
+    tasks: [
+      { name: "Площадь равна 15", check: (out) => out.trim() === "15" }
+    ]
+  },
+  {
+    id: 13, title: "Модули и импорты",
+    theory: `
+      <h2>Стандартная библиотека</h2>
+      <p>Python имеет огромную стандартную библиотеку. Модули подключаются оператором <code>import</code>.</p>
+      <pre><code>import math
+print(math.pi)        # 3.14159...
+print(math.sqrt(16))  # 4.0
+
+from random import randint
+print(randint(1, 10))  # случайное целое от 1 до 10</code></pre>
+      <h3>Модуль datetime</h3>
+      <pre><code>from datetime import datetime, timedelta
+now = datetime.now()
+print(now.strftime("%Y-%m-%d %H:%M"))
+tomorrow = now + timedelta(days=1)
+print(tomorrow)</code></pre>
+      <h3>Модуль os и pathlib</h3>
+      <pre><code>import os
+print(os.getcwd())  # текущая директория
+
+from pathlib import Path
+p = Path("data.txt")
+print(p.exists())   # существует ли файл</code></pre>
+      <h3>Модуль json</h3>
+      <pre><code>import json
+data = {"name": "Alice", "age": 30}
+text = json.dumps(data)
+print(text)  # {"name": "Alice", "age": 30}
+
+parsed = json.loads(text)
+print(parsed["name"])  # Alice</code></pre>
+      <h3>Задание</h3>
+      <p>Используя модуль <code>math</code>, выведите значение числа π, округлённое до 2 знаков после запятой (должно получиться <code>3.14</code>).</p>
+    `,
+    starter: `import math\n\npi_rounded = round(math.pi, 2)\nprint(pi_rounded)`,
+    tasks: [
+      { name: "Вывод: 3.14", check: (out) => out.trim() === "3.14" }
+    ]
+  },
+  {
+    id: 14, title: "Регулярные выражения",
+    theory: `
+      <h2>Модуль re</h2>
+      <p>Регулярные выражения — мощный инструмент для поиска и обработки текста по шаблону.</p>
+      <pre><code>import re
+text = "Мой телефон: 8-999-123-45-67"
+match = re.search(r"\\d{3}-\\d{3}-\\d{2}-\\d{2}", text)
+if match:
+    print(match.group())  # 999-123-45-67</code></pre>
+      <h3>Основные шаблоны</h3>
+      <ul>
+        <li><code>\\d</code> — цифра, <code>\\D</code> — не цифра</li>
+        <li><code>\\w</code> — буква/цифра/_, <code>\\W</code> — наоборот</li>
+        <li><code>\\s</code> — пробел, <code>\\S</code> — не пробел</li>
+        <li><code>.</code> — любой символ</li>
+        <li><code>*</code> — 0 или более, <code>+</code> — 1 или более</li>
+        <li><code>?</code> — 0 или 1</li>
+        <li><code>{n}</code> — ровно n раз</li>
+      </ul>
+      <h3>Основные функции</h3>
+      <pre><code>import re
+text = "cat dog cat bird cat"
+print(re.findall(r"cat", text))  # ['cat', 'cat', 'cat']
+print(re.sub(r"cat", "dog", text))  # dog dog dog bird dog
+print(re.split(r"\\s+", "a  b   c"))  # ['a', 'b', 'c']</code></pre>
+      <h3>Задание</h3>
+      <p>Из строки <code>"Emails: test@mail.com, admin@site.org, invalid"</code> извлеките все email-адреса и выведите их списком.</p>
+    `,
+    starter: `import re\ntext = "Emails: test@mail.com, admin@site.org, invalid"\n\nemails = re.findall(r"[\\w.-]+@[\\w.-]+\\.\\w+", text)\nprint(emails)`,
+    tasks: [
+      { name: "Найдены email: test@mail.com, admin@site.org", check: (out) => 
+        out.includes("test@mail.com") && out.includes("admin@site.org") && !out.includes("invalid")
+      }
+    ]
+  },
+  {
+    id: 15, title: "Финальный проект: Калькулятор",
+    theory: `
+      <h2>Поздравляем! 🎉</h2>
+      <p>Вы прошли весь курс! Теперь пришло время закрепить знания, написав полноценный проект.</p>
+      <h3>Задача</h3>
+      <p>Создайте класс <code>Calculator</code>, который умеет:</p>
+      <ul>
+        <li>Выполнять базовые операции: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code></li>
+        <li>Хранить историю вычислений</li>
+        <li>Иметь метод <code>history()</code>, возвращающий список всех операций</li>
+        <li>Обрабатывать деление на ноль</li>
+      </ul>
+      <h3>Пример использования</h3>
+      <pre><code>calc = Calculator()
+calc.add(10, 5)      # 15
+calc.multiply(3, 4)  # 12
+calc.divide(10, 0)   # "error"
+print(calc.history())
+# ['10 + 5 = 15', '3 * 4 = 12', '10 / 0 = error']</code></pre>
+      <h3>Подсказки</h3>
+      <ul>
+        <li>Используйте <code>__init__</code> для инициализации списка истории</li>
+        <li>Используйте <code>try/except</code> для обработки деления на ноль</li>
+        <li>Каждая операция добавляет строку в историю</li>
+      </ul>
+      <h3>Задание</h3>
+      <p>Реализуйте класс <code>Calculator</code>. Создайте экземпляр, выполните: <code>add(10, 5)</code>, <code>multiply(3, 4)</code>, <code>divide(10, 0)</code>. Выведите историю.</p>
+    `,
+    starter: `class Calculator:\n    def __init__(self):\n        self._history = []\n    \n    def add(self, a, b):\n        result = a + b\n        self._history.append(f"{a} + {b} = {result}")\n        return result\n    \n    def subtract(self, a, b):\n        result = a - b\n        self._history.append(f"{a} - {b} = {result}")\n        return result\n    \n    def multiply(self, a, b):\n        result = a * b\n        self._history.append(f"{a} * {b} = {result}")\n        return result\n    \n    def divide(self, a, b):\n        try:\n            result = a / b\n            self._history.append(f"{a} / {b} = {result}")\n            return result\n        except ZeroDivisionError:\n            self._history.append(f"{a} / {b} = error")\n            return "error"\n    \n    def history(self):\n        return self._history\n\ncalc = Calculator()\ncalc.add(10, 5)\ncalc.multiply(3, 4)\ncalc.divide(10, 0)\nfor entry in calc.history():\n    print(entry)`,
+    tasks: [
+      { name: "Выводит '10 + 5 = 15'", check: (out) => out.includes("10 + 5 = 15") },
+      { name: "Выводит '3 * 4 = 12'", check: (out) => out.includes("3 * 4 = 12") },
+      { name: "Выводит '10 / 0 = error'", check: (out) => out.includes("10 / 0 = error") }
+    ]
+  }
+];
+
+/* ============ Состояние ============ */
+let currentLessonId = 0;
+let completedLessons = new Set();
+let pyodide = null;
+
+function loadProgress() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("pycamp_progress") || "[]");
+    completedLessons = new Set(saved);
+    currentLessonId = parseInt(localStorage.getItem("pycamp_current") || "0");
+  } catch(e) {}
+}
+
+function saveProgress() {
+  localStorage.setItem("pycamp_progress", JSON.stringify([...completedLessons]));
+  localStorage.setItem("pycamp_current", currentLessonId);
+}
+
+function resetProgress() {
+  if (confirm("Сбросить весь прогресс?")) {
+    completedLessons.clear();
+    currentLessonId = 0;
+    saveProgress();
+    render();
+    showToast("Прогресс сброшен", "success");
+  }
+}
+
+function updateProgressBar() {
+  const total = LESSONS.length;
+  const done = completedLessons.size;
+  document.getElementById("progress-text").textContent = `${done} / ${total}`;
+  document.getElementById("progress-fill").style.width = `${(done/total)*100}%`;
+}
+
+/* ============ Рендеринг ============ */
+function renderSidebar() {
+  const sb = document.getElementById("sidebar");
+  sb.innerHTML = `<div class="section-title">Программа курса</div>`;
+  LESSONS.forEach((l, i) => {
+    const active = i === currentLessonId ? "active" : "";
+    const completed = completedLessons.has(i) ? "completed" : "";
+    sb.innerHTML += `
+      <div class="lesson-item ${active} ${completed}" onclick="goToLesson(${i})">
+        <div class="check">${completedLessons.has(i) ? "✓" : ""}</div>
+        <div class="lesson-title">
+          <span class="lesson-num">${String(i+1).padStart(2,"0")}.</span>
+          ${l.title}
+        </div>
+      </div>
+    `;
+  });
+}
+
+function renderContent() {
+  const lesson = LESSONS[currentLessonId];
+  const content = document.getElementById("content");
+  content.innerHTML = `
+    <div class="lesson-header">
+      <h1>${lesson.title}</h1>
+      <div class="meta">Урок ${currentLessonId + 1} из ${LESSONS.length} ${completedLessons.has(currentLessonId) ? "· ✓ Пройден" : ""}</div>
+    </div>
+    <div class="lesson-body">${lesson.theory}</div>
+    <div class="task-section">
+      <h3>📋 Требования к заданию</h3>
+      <ul class="task-list" id="task-list">
+        ${lesson.tasks.map(t => `<li>${t.name}</li>`).join("")}
+      </ul>
+    </div>
+    <div class="editor-section">
+      <div class="editor-wrap">
+        <div class="editor-toolbar">
+          <span class="file-name">main.py</span>
+          <div>
+            <button class="btn" onclick="resetCode()">↺ Сбросить</button>
+            <button class="btn btn-primary" onclick="runCode()">▶ Запустить</button>
+          </div>
+        </div>
+        <textarea id="code-editor" spellcheck="false">${lesson.starter}</textarea>
+      </div>
+      <div class="output-wrap">
+        <div class="output-header">
+          <span>📤 Вывод программы</span>
+          <button class="btn" onclick="clearOutput()" style="padding:2px 8px;font-size:11px">Очистить</button>
+        </div>
+        <div id="output">Нажмите "Запустить" для выполнения кода...</div>
+      </div>
+    </div>
+    <div class="lesson-footer">
+      <button class="btn" onclick="prevLesson()" ${currentLessonId === 0 ? "disabled" : ""}>← Предыдущий</button>
+      <button class="btn btn-success" onclick="markComplete()">✓ Отметить пройденным</button>
+      <button class="btn" onclick="nextLesson()" ${currentLessonId === LESSONS.length - 1 ? "disabled" : ""}>Следующий →</button>
+    </div>
+  `;
+  // Обработка Tab в textarea
+  const ta = document.getElementById("code-editor");
+  ta.addEventListener("keydown", (e) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      ta.value = ta.value.substring(0, start) + "    " + ta.value.substring(end);
+      ta.selectionStart = ta.selectionEnd = start + 4;
+    }
+  });
+  // Ctrl+Enter для запуска
+  ta.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      runCode();
+    }
+  });
+}
+
+function render() {
+  renderSidebar();
+  renderContent();
+  updateProgressBar();
+}
+
+/* ============ Навигация ============ */
+function goToLesson(id) {
+  currentLessonId = id;
+  saveProgress();
+  render();
+  document.getElementById("content").scrollTo(0, 0);
+}
+function nextLesson() {
+  if (currentLessonId < LESSONS.length - 1) goToLesson(currentLessonId + 1);
+}
+function prevLesson() {
+  if (currentLessonId > 0) goToLesson(currentLessonId - 1);
+}
+function resetCode() {
+  document.getElementById("code-editor").value = LESSONS[currentLessonId].starter;
+  clearOutput();
+}
+function clearOutput() {
+  const out = document.getElementById("output");
+  out.textContent = "Нажмите \"Запустить\" для выполнения кода...";
+  out.className = "";
+}
+
+/* ============ Запуск кода ============ */
+async function runCode() {
+  if (!pyodide) {
+    showToast("Python ещё загружается, подождите...", "error");
+    return;
+  }
+  const code = document.getElementById("code-editor").value;
+  const out = document.getElementById("output");
+  out.textContent = "⏳ Выполняется...";
+  out.className = "";
+  
+  // Перехват stdout/stderr
+  pyodide.runPython(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+sys.stderr = StringIO()
+`);
+  
+  try {
+    await pyodide.runPythonAsync(code);
+    const stdout = pyodide.runPython("sys.stdout.getvalue()");
+    const stderr = pyodide.runPython("sys.stderr.getvalue()");
+    
+    if (stderr) {
+      out.textContent = stderr;
+      out.className = "error";
+    } else {
+      out.textContent = stdout || "(программа завершилась без вывода)";
+      out.className = "success";
+      checkTasks(stdout);
+    }
+  } catch (err) {
+    out.textContent = "❌ Ошибка:\n" + err.message;
+    out.className = "error";
+  } finally {
+    pyodide.runPython(`
+sys.stdout = sys.__stdout__
+sys.stderr = sys.__stderr__
+`);
+  }
+}
+
+function checkTasks(stdout) {
+  const lesson = LESSONS[currentLessonId];
+  const items = document.querySelectorAll("#task-list li");
+  let allPassed = true;
+  lesson.tasks.forEach((t, i) => {
+    const passed = t.check(stdout);
+    items[i].classList.add(passed ? "pass" : "fail");
+    if (!passed) allPassed = false;
+  });
+  if (allPassed && !completedLessons.has(currentLessonId)) {
+    completedLessons.add(currentLessonId);
+    saveProgress();
+    renderSidebar();
+    updateProgressBar();
+    showToast("🎉 Отлично! Все тесты пройдены!", "success");
+  }
+}
+
+function markComplete() {
+  completedLessons.add(currentLessonId);
+  saveProgress();
+  render();
+  showToast("Урок отмечен как пройденный", "success");
+}
+
+/* ============ Уведомления ============ */
+function showToast(msg, type = "") {
+  const t = document.createElement("div");
+  t.className = "toast " + type;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+/* ============ Инициализация Pyodide ============ */
+async function initPyodide() {
+  try {
+    pyodide = await loadPyodide();
+    document.getElementById("loader").style.display = "none";
+    showToast("✓ Python готов к работе!", "success");
+  } catch (e) {
+    document.getElementById("loader").innerHTML = `
+      <div style="color:var(--danger);text-align:center">
+        ❌ Не удалось загрузить Python<br>
+        <small>${e.message}</small><br><br>
+        <button class="btn btn-primary" onclick="location.reload()">Повторить</button>
+      </div>
+    `;
+  }
+}
+
+/* ============ Старт ============ */
+loadProgress();
+render();
+initPyodide();
+</script>
+
+</body>
+</html>

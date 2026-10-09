@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Python Camp</title>
+    <!-- Подключаем Pyodide для запуска Python в браузере -->
+    <script type="importmap">
+        {
+            "imports": {
+                "pyodide": "https://cdn.jsdelivr.net/pyodide/v0.26.0/full/pyodide.js"
+            }
+        }
+    </script>
+    <style>
+        :root { --primary: #4299e1; --bg: #f7fafc; --card: #ffffff; --text: #2d3748; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 30px; }
+        nav button { padding: 10px 15px; margin-right: 10px; cursor: pointer; border: none; background: var(--primary); color: white; border-radius: 5px; }
+        nav button.active { background: #2b6cb0; }
+        #content { background: var(--card); padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-height: 400px; display: flex; flex-direction: column; gap: 20px; }
+        h2 { color: var(--primary); }
+        pre { background: #1e1e2e; color: #d6deeb; padding: 15px; border-radius: 8px; overflow-x: auto; }
+        code { font-family: monospace; }
+        textarea { width: 100%; height: 200px; font-family: monospace; padding: 10px; border: 1px solid #cbd5e0; border-radius: 5px; background: #1a1a1d; color: #fff; }
+        button.run { background: #48bb78; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        #output { margin-top: 20px; padding: 15px; background: #e2e8f0; border-radius: 5px; min-height: 60px; white-space: pre-wrap; display: none; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐍 Mini Python Camp</h1>
+            <p>Все уроки в одном файле. Python работает прямо в браузере.</p>
+        </header>
+        
+        <nav>
+            <button onclick="switchLesson('intro')" class="active">1. Основы</button>
+            <button onclick="switchLesson('loops')">2. Циклы</button>
+            <button onclick="switchLesson('functions')">3. Функции</button>
+            <button onclick="switchLesson('lists')">4. Списки</button>
+            <button onclick="switchLesson('practice')">5. Практика</button>
+        </nav>
+
+        <div id="content">
+            <!-- Контент уроков будет вставляться сюда через JS -->
+            <div id="lesson-intro" class="lesson-block">
+                <h2>Урок 1: Основы синтаксиса</h2>
+                <p><strong>Цель:</strong> Научиться выводить текст и работать с переменными.</p>
+                <p>В Python не нужны точки с запятой в конце строк. Отступы (пробелы) определяют блоки кода.</p>
+                
+                <h3>Пример кода:</h3>
+                <pre><code>name = "Алиса"
+age = 25
+print(f"Привет, меня зовут {name}, мне {age} лет.")</code></pre>
+                
+                <p><strong>Задание:</strong> Измени переменную <code>name</code> на свое имя и запусти код.</p>
+                <textarea id="code-editor-intro">name = "Твой Имя"
+age = 20
+print(f"Привет, {name}!")</textarea>
+                <button class="run" onclick="runCode('intro')">Запустить код ▷</button>
+                <div id="output-intro" class="output"></div>
+            </div>
+
+            <div id="lesson-loops" class="lesson-block hidden">
+                <h2>Урок 2: Циклы и условия</h2>
+                <p><strong>Цель:</strong> Использовать циклы <code>for</code> и условия <code>if</code>.</p>
+                <p>Цикл <code>for</code> перебирает элементы. Условие <code>if</code> проверяет логику.</p>
+                <pre><code>for i in range(3):
+    if i % 2 == 0:
+        print(f"{i} - четное")
+    else:
+        print(f"{i} - нечетное")</code></pre>
+                <p><strong>Задание:</strong> Добавь вывод сообщения "Конец цикла" после завершения цикла.</p>
+                <textarea id="code-editor-loops">for i in range(3):
+    if i % 2 == 0:
+        print(f"{i} - четное")
+    else:
+        print(f"{i} - нечетное")
+# Добавь код ниже</textarea>
+                <button class="run" onclick="runCode('loops')">Запустить код ▷</button>
+                <div id="output-loops" class="output"></div>
+            </div>
+
+            <div id="lesson-functions" class="lesson-block hidden">
+                <h2>Урок 3: Функции</h2>
+                <p><strong>Цель:</strong> Создавать и вызывать функции.</p>
+                <p>Функции позволяют переиспользовать код. Они объявляются через ключевое слово <code>def</code>.</p>
+                <pre><code>def greet(name):
+    return f"Привет, {name}!"
+
+message = greet("Разработчик")
+print(message)</code></pre>
+                <p><strong>Задание:</strong> Напиши функцию <code>square(x)</code>, которая возвращает квадрат числа <code>x</code>. Вызови её с числом 5.</p>
+                <textarea id="code-editor-functions"># Напиши свою функцию здесь
+
+# Вызов функции</textarea>
+                <button class="run" onclick="runCode('functions')">Запустить код ▷</button>
+                <div id="output-functions" class="output"></div>
+            </div>
+
+            <div id="lesson-lists" class="lesson-block hidden">
+                <h2>Урок 4: Списки и методы</h2>
+                <p><strong>Цель:</strong> Работать со списками (<code>list</code>) и их методами.</p>
+                <p>Списки хранят упорядоченные данные. Можно добавлять элементы через <code>.append()</code>.</p>
+                <pre><code>fruits = ["яблоко", "банан"]
+fruits.append("апельсин")
+print(fruits[0]) # Вывод первого элемента</code></pre>
+                <p><strong>Задание:</strong> Создай список из 3 твоих любимых цветов. Добавь к нему еще один цвет через <code>.append()</code> и выведи весь список.</p>
+                <textarea id="code-editor-lists"># Твой код здесь</textarea>
+                <button class="run" onclick="runCode('lists')">Запустить код ▷</button>
+                <div id="output-lists" class="output"></div>
+            </div>
+
+            <div id="lesson-practice" class="lesson-block hidden">
+                <h2>Урок 5: Итоговая задача</h2>
+                <p><strong>Задача:</strong> Напиши программу, которая запрашивает у пользователя имя (используй <code>input()</code>), приветствует его, а затем выводит длину имени.</p>
+                <p><em>Примечание: В этом браузере <code>input()</code> может работать нестабильно. Для теста используй жестко заданную переменную, например <code>name = "Иван"</code>, но попробуй написать логику с <code>input()</code>.</em></p>
+                <textarea id="code-editor-practice"># Реши задачу здесь
+name = "Тестер" 
+# Напиши логику...</textarea>
+                <button class="run" onclick="runCode('practice')">Запустить код ▷</button>
+                <div id="output-practice" class="output"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pyodide = null;
+
+        // Инициализация Pyodide (загрузчик Python)
+        async function initPyodide() {
+            pyodide = await loadPyodide();
+            console.log("Python готов!");
+        }
+
+        // Переключение уроков
+        function switchLesson(lessonId) {
+            document.querySelectorAll('.lesson-block').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(`lesson-${lessonId}`).classList.remove('hidden');
+            event.target.classList.add('active');
+        }
+
+        // Запуск кода пользователя
+        async function runCode(lessonId) {
+            const editorId = `code-editor-${lessonId}`;
+            const outputId = `output-${lessonId}`;
+            const code = document.getElementById(editorId).value;
+            const outputDiv = document.getElementById(outputId);
+            
+            outputDiv.style.display = 'block';
+            outputDiv.textContent = "Выполнение...";
+
+            if (!pyodide) {
+                outputDiv.textContent = "Загрузка Python... Пожалуйста, подождите.";
+                return;
+            }
+
+            try {
+                // Перенаправляем вывод print() в нашу переменную
+                const result = await pyodide.runPythonAsync(`
+                    import sys
+                    from io import StringIO
+                    
+                    old_stdout = sys.stdout
+                    redirected_output = StringIO()
+                    sys.stdout = redirected_output
+                    
+                    try:
+                        ${code.replace(/`/g, '\\`')}
+                    except Exception as e:
+                        sys.stdout = old_stdout
+                        raise e
+                    
+                    sys.stdout = old_stdout
+                    result = redirected_output.getvalue()
+                    result
+                `);
+                
+                outputDiv.textContent = result || "Код выполнен успешно (вывода нет).";
+            } catch (error) {
+                outputDiv.style.color = "#e53e3e";
+                outputDiv.textContent = "Ошибка:\n" + error.toString();
+            }
+        }
+
+        initPyodide();
+    </script>
+</body>
+</html>
